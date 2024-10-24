@@ -12,7 +12,7 @@ class Particle{
     inisialisasi(min, max){
         for (let i = 0; i < this.nDimensi; i++){
             this.position[i] = Math.random() * (max - min) + min;
-            this.velocity[i] = Math.random() * (max - min) + min;
+            this.velocity[i] = 0;
             this.pbest[i] = this.position[i];
         }
     }

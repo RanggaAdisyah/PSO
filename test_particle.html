@@ -36,7 +36,7 @@
         // Membuat dan menginisialisasi partikel
         for (let i = 0; i < nParticle; i++){
             const particle = new Particle(nDimension, Rosenbrock);
-            particle.inisialisasi(-10, 10);
+            particle.inisialisasi(-5, 5);
             particles.push(particle);
         }
 
@@ -48,7 +48,7 @@
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td class = "border border-gray-300 p-2"> ${index + 1}</td>
-                <td class = "border border-gray-300 p-2"> ${particle.position.join(', ')}</td>\
+                <td class = "border border-gray-300 p-2"> ${particle.position.join(', ')}</td>
                 <td class = "border border-gray-300 p-2"> ${particle.fitness}</td>
                 <td class = "border border-gray-300 p-2"> ${particle.velocity.join(', ')}</td>
                 <td class = "border border-gray-300 p-2"> ${particle.pbest.join(', ')}</td>
