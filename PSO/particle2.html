@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Particle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <h1 class="text-center text-2xl font-bold mt-5">Pengujian Class Particle</h1>
+    
+    
+    <table class="min-w-full border-collapse border border-blue-300 mt-5">
+        <thead>
+            <tr>
+                <th class="border border-gray-300 p-2">Partikel</th>
+                <th class="border border-gray-300 p-2">Posisi</th>
+                <th class="border border-gray-300 p-2">Fitness</th>
+                <th class="border border-gray-300 p-2">Kecepatan</th>
+                <th class="border border-gray-300 p-2">Pbest</th>
+                <th class="border border-gray-300 p-2">Pbest Fitness</th>
+            </tr>
+        </thead>
+        <tbody id="particleTableBody">
+            <!-- Data Partikel akan dimasukkan di sini -->
+        </tbody>
+    </table>
+
+    <script type="module">
+        import { Rosenbrock } from "./rosenbrock.js";
+        import { Particle } from "./particle.js";
+    
+        // Fungsi untuk melakukan pengujian pada kelas Particle
+        function testParticle() {
+            const nParticles = 5;  // Jumlah partikel
+            const nDimensions = 2; // Dimensi
+            const particles = [];
+    
+            // Membuat dan menginisialisasi partikel
+            for (let i = 0; i < nParticles; i++) {
+                const particle = new Particle(nDimensions, Rosenbrock);
+                particle.inisialisasiPosisi(-10, 10); // Inisialisasi posisi dalam rentang [-10, 10]
+                particles.push(particle);
+            }
+            
+            const tableBody = document.getElementById('particleTableBody');
+            particles.forEach((particle, index) => {
+                particle.calculateFitness();
+                particle.updatePbest();
+                //particle.calculateFitness();
+                //particle.updatePosition();
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td class = "border border-gray-300 p-2 text-center">${index + 1}</td>
+                <td class = "border border-gray-300 p-2 text-center">${particle.position.join(', ')}</td>
+                <td class = "border border-gray-300 p-2 text-center">${particle.fitness}</td>
+                <td class = "border border-gray-300 p-2 text-center">${particle.velocity.join(', ')}</td>
+                <td class = "border border-gray-300 p-2 text-center">${particle.pbest.join(', ')}</td>
+                <td class = "border border-gray-300 p-2 text-center">${particle.pbestFitness}</td>
+                `;
+                tableBody.appendChild(row);
+                particle.updatePosition();
+                console.log(`update posisi: ${particle.position[0]},{${particle.position[1]}}`);
+            });
+        }
+    
+        testParticle();
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test PSO Class</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <h1 class="text-center text-2xl font-bold mt-5">TEST CLASS PSO</h1>
+
+    <table class="min-w-full mt-5 border-collapse">
+      <thead>
+        <tr>
+          <th class="border border-gray-300 p-2">Partikel</th>
+          <th class="border border-gray-300 p-2">Posisi</th>
+          <th class="border border-gray-300 p-2">Fitness</th>
+          <th class="border border-gray-300 p-2">Kecepatan</th>
+          <th class="border border-gray-300 p-2">Pbest</th>
+          <th class="border border-gray-300 p-2">Pbest Fitness</th>
+        </tr>
+      </thead>
+      <tbody id="particleTableBody">
+        <!-- Data PSO akan dimasukkan di sini -->
+      </tbody>
+    </table>
+
+    <div class="mt-5 text-center">
+      <p id="gbestFitness" class="text-lg front-semibold">Gbest Fitness :</p>
+      <p id="gbestPosition" class="text-lg front-semibold">Gbest Position :</p>
+    </div>
+
+    <div class="text-center mt-5">
+      <button id="startButton" class="bg-blue-500 text-white px-4 py-2 rounded">
+        Start Iteration
+      </button>
+    </div>
+
+    <div class="mt-5">
+      <canvas id="fitnessChart"></canvas>
+    </div>
+
+    <script type="module">
+      import { Rosenbrock } from "./rosenbrock.js";
+      import { PSO } from "./pso.js";
+
+      const tableBody = document.getElementById("particleTableBody");
+      const gbestFitnessElement = document.getElementById("gbestFitness");
+      const gbestPositionElement = document.getElementById("gbestPosition");
+      const startButton = document.getElementById("startButton");
+      const fitnessChartCtx = document
+        .getElementById("fitnessChart")
+        .getContext("2d");
+      const n_particle = 7;
+      const pso = new PSO(n_particle, 2, Rosenbrock);
+
+      pso.evaluateFitness();
+      pso.updatePbest();
+      pso.updateGbest();
+      pso.updateVelocity();
+
+      //pso.particles.forEach((particle, index) => {
+      //  const row = document.createElement("tr");
+      //  row.innerHTML = `
+      //          <td class="border border-gray-300 p-2 text-center">${index + 1}</td>
+      //          <td class="border border-gray-300 p-2 text-center">${particle.position.join(", ")}</td>
+      //          <td class="border border-gray-300 p-2 text-center">${particle.fitness}</td>
+      //          <td class="border border-gray-300 p-2 text-center">${particle.velocity.join(", ")}</td>
+      //          <td class="border border-gray-300 p-2 text-center">${particle.pbest.join(", ")}</td>
+      //          <td class="border border-gray-300 p-2 text-center">${particle.pbestFitness}</td>
+      //      `;
+      //  tableBody.appendChild(row);
+      //});
+
+      //pso.updatePosition();
+      //gbestFitnessElement.textContent = `Gbest Fitness : ${pso.gbestFitness}`;
+      //gbestPositionElement.textContent = `Gbest Position : ${pso.gbestPosition.join(",")}`;
+
+      function updateTable() {
+        pso.particles.forEach((particle, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                      <td class="border border-gray-300 p-2 text-center">${index + 1}</td>
+                      <td class="border border-gray-300 p-2 text-center">${particle.position.map((p) => p.toFixed(2)).join(", ")}</td>
+                      <td class="border border-gray-300 p-2 text-center">${particle.fitness.toFixed(2)}</td>
+                      <td class="border border-gray-300 p-2 text-center">${particle.velocity.map((v) => v.toFixed(2)).join(", ")}</td>
+                      <td class="border border-gray-300 p-2 text-center">${particle.pbest.map((pb) => pb.toFixed(2)).join(", ")}</td>
+                      <td class="border border-gray-300 p-2 text-center">${particle.pbestFitness.toFixed(2)}</td>
+                  `;
+          tableBody.appendChild(row);
+        });
+
+        pso.updatePosition();
+        gbestFitnessElement.textContent = `Gbest Fitness : ${pso.gbestFitness.toFixed(2)}`;
+        gbestPositionElement.textContent = `Gbest Position : ${pso.gbestPosition.map((gp) => gp.toFixed(2)).join(",")}`;
+      }
+
+      let iteration = 0;
+      let gbestFitnessData = [];
+      let labels = [];
+
+      const fitnessChart = new Chart(fitnessChartCtx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Gbest Fitness",
+              data: gbestFitnessData,
+              borderColor: "rgba(75,192,192,1)",
+              backgroundColor: "rgba(75,192,192,0.2)",
+              fill: true,
+              tension: 0.1,
+            },
+          ],
+        },
+        option: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Iteration",
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Gbest Fitness",
+              },
+            },
+          },
+        },
+      });
+
+      function updateChart() {
+        labels.push(iteration);
+        gbestFitnessData.push(pso.gbestFitness);
+
+        fitnessChart.update();
+      }
+
+      function runPSOIterations() {
+        const maxIterations = 20;
+        const interval = setInterval(() => {
+          if (iteration >= maxIterations) {
+            clearInterval(interval);
+          } else {
+            pso.mainPSO();
+            updateTable();
+            updateChart();
+            iteration++;
+          }
+        }, 500);
+      }
+
+      startButton.addEventListener("click", () => {
+        iteration = 0;
+        runPSOIterations();
+      });
+
+      updateTable();
+    </script>
+  </body>
+</html>
